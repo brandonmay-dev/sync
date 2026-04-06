@@ -8,7 +8,7 @@ export const protectRoute = async (req, res, next) => {
   next();
 };
 
-export const reqireAdmin = async (req, res, next) => {
+export const requireAdmin = async (req, res, next) => {
   try {
     const currentUser = await clerkClient.users.getUser(req.auth.userID);
     const isAdmin =
@@ -19,6 +19,6 @@ export const reqireAdmin = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
