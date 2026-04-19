@@ -2,14 +2,21 @@ import type { Song } from "@/types";
 import SectionGridSkeleton from "./SectionGridSkeleton";
 import { Button } from "@/components/ui/button";
 import PlayButton from "./PlayButton";
+import { Link } from "react-router-dom";
 
 type SectionGridProps = {
   title: string;
   songs: Song[];
   isLoading: boolean;
+  viewAllPath: string;
 };
 
-const SectionGrid = ({ title, songs, isLoading }: SectionGridProps) => {
+const SectionGrid = ({
+  title,
+  songs,
+  isLoading,
+  viewAllPath,
+}: SectionGridProps) => {
   if (isLoading) return <SectionGridSkeleton />;
 
   return (
@@ -17,10 +24,11 @@ const SectionGrid = ({ title, songs, isLoading }: SectionGridProps) => {
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold sm:text-2xl">{title}</h2>
         <Button
+          asChild
           variant="link"
           className="text-sm text-zinc-400 hover:text-white"
         >
-          See all
+          <Link to={viewAllPath}>See all</Link>
         </Button>
       </div>
 

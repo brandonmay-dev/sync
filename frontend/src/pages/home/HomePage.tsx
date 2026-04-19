@@ -53,11 +53,13 @@ const HomePage = () => {
               title="Made For You"
               songs={madeForYouSongs}
               isLoading={isLoading}
+              viewAllPath="/made-for-you"
             />
             <SectionGrid
               title="Trending"
               songs={trendingSongs}
               isLoading={isLoading}
+              viewAllPath="/trending"
             />
           </div>
         </div>
