@@ -87,7 +87,7 @@ const LoginPrompt = () => (
   <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-4">
     <div className="relative">
       <div
-        className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full blur-lg
+        className="absolute -inset-1 bg-linear-to-r from-emerald-500 to-sky-500 rounded-full blur-lg
        opacity-75 animate-pulse"
         aria-hidden="true"
       />
@@ -96,7 +96,7 @@ const LoginPrompt = () => (
       </div>
     </div>
 
-    <div className="space-y-2 max-w-[250px]">
+    <div className="space-y-2 max-w-62.5">
       <h3 className="text-lg font-semibold text-white">
         See What Friends Are Playing
       </h3>
