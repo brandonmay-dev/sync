@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Clock, Pause, Play } from "lucide-react";
@@ -38,6 +39,12 @@ const AlbumPage = () => {
 
   const handlePlaySong = (index: number) => {
     if (!currentAlbum) return;
+
+    const selectedSong = currentAlbum.songs[index];
+    if (selectedSong._id === currentSong?._id) {
+      togglePlay();
+      return;
+    }
 
     playAlbum(currentAlbum?.songs, index);
   };
@@ -118,32 +125,47 @@ const AlbumPage = () => {
                   {currentAlbum?.songs.map((song, index) => {
                     const isCurrentSong = currentSong?._id === song._id;
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={song._id}
                         onClick={() => handlePlaySong(index)}
-                        className={`grid grid-cols-[16px_4fr_2fr_1fr] gap-4 px-4 py-2 text-sm 
-                      text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer
-                      `}
+                        className={cn(
+                          "grid w-full grid-cols-[16px_4fr_2fr_1fr] gap-4 rounded-md px-4 py-2 text-left text-sm text-zinc-400 transition-colors hover:bg-white/5 group cursor-pointer",
+                          isCurrentSong && "bg-white/5",
+                        )}
+                        aria-label={`${isCurrentSong && isPlaying ? "Pause" : "Play"} ${song.title} by ${song.artist}`}
                       >
                         <div className="flex items-center justify-center">
                           {isCurrentSong && isPlaying ? (
                             <div className="size-4 text-green-500">♫</div>
                           ) : (
-                            <span className="group-hover:hidden">
-                              {index + 1}
-                            </span>
-                          )}
-                          {!isCurrentSong && (
-                            <Play className="h-4 w-4 hidden group-hover:block" />
+                            <span>{index + 1}</span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <img
-                            src={song.imageUrl}
-                            alt={song.title}
-                            className="size-10"
-                          />
+                          <div className="relative shrink-0 overflow-hidden rounded-md">
+                            <img
+                              src={song.imageUrl}
+                              alt={song.title}
+                              className="size-10 object-cover"
+                            />
+                            <div
+                              className={cn(
+                                "absolute inset-0 flex items-center justify-center bg-black/45 transition-opacity",
+                                isCurrentSong
+                                  ? "opacity-100"
+                                  : "opacity-0 group-hover:opacity-100",
+                              )}
+                              aria-hidden="true"
+                            >
+                              {isCurrentSong && isPlaying ? (
+                                <Pause className="size-4 text-white" />
+                              ) : (
+                                <Play className="size-4 text-white" />
+                              )}
+                            </div>
+                          </div>
 
                           <div>
                             <div className={`font-medium text-white`}>
@@ -158,7 +180,7 @@ const AlbumPage = () => {
                         <div className="flex items-center">
                           {formatDuration(song.duration)}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

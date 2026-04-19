@@ -1,6 +1,7 @@
 import Topbar from "@/components/Topbar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { ArrowLeft, Clock, Pause, Play, TrendingUp, WandSparkles } from "lucide-react";
@@ -82,6 +83,12 @@ const SongCollectionPage = ({
 
   const handlePlaySong = (index: number) => {
     if (songs.length === 0) return;
+
+    const selectedSong = songs[index];
+    if (selectedSong._id === currentSong?._id) {
+      togglePlay();
+      return;
+    }
 
     playAlbum(songs, index);
   };
@@ -169,30 +176,47 @@ const SongCollectionPage = ({
                       const isCurrentSong = currentSong?._id === song._id;
 
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={song._id}
                           onClick={() => handlePlaySong(index)}
-                          className="group grid cursor-pointer grid-cols-[16px_minmax(0,1fr)_auto] gap-4 rounded-xl px-3 py-3 text-sm text-zinc-300 transition-colors hover:bg-white/5 md:grid-cols-[16px_minmax(0,4fr)_minmax(0,2fr)_auto]"
+                          className={cn(
+                            "group grid w-full cursor-pointer grid-cols-[16px_minmax(0,1fr)_auto] gap-4 rounded-xl px-3 py-3 text-left text-sm text-zinc-300 transition-colors hover:bg-white/5 md:grid-cols-[16px_minmax(0,4fr)_minmax(0,2fr)_auto]",
+                            isCurrentSong && "bg-white/5",
+                          )}
+                          aria-label={`${isCurrentSong && isPlaying ? "Pause" : "Play"} ${song.title} by ${song.artist}`}
                         >
                           <div className="flex items-center justify-center">
                             {isCurrentSong && isPlaying ? (
                               <span className="text-green-500">♫</span>
                             ) : (
-                              <>
-                                <span className="group-hover:hidden">
-                                  {index + 1}
-                                </span>
-                                <Play className="hidden size-4 group-hover:block" />
-                              </>
+                              <span>{index + 1}</span>
                             )}
                           </div>
 
                           <div className="flex min-w-0 items-center gap-3">
-                            <img
-                              src={song.imageUrl}
-                              alt={song.title}
-                              className="size-12 rounded-md object-cover"
-                            />
+                            <div className="relative shrink-0 overflow-hidden rounded-md">
+                              <img
+                                src={song.imageUrl}
+                                alt={song.title}
+                                className="size-12 object-cover"
+                              />
+                              <div
+                                className={cn(
+                                  "absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity",
+                                  isCurrentSong
+                                    ? "opacity-100"
+                                    : "opacity-0 group-hover:opacity-100",
+                                )}
+                                aria-hidden="true"
+                              >
+                                {isCurrentSong && isPlaying ? (
+                                  <Pause className="size-5 text-white" />
+                                ) : (
+                                  <Play className="size-5 text-white" />
+                                )}
+                              </div>
+                            </div>
                             <div className="min-w-0">
                               <div className="truncate font-medium text-white">
                                 {song.title}
@@ -210,7 +234,7 @@ const SongCollectionPage = ({
                           <div className="flex items-center text-zinc-400">
                             {formatDuration(song.duration)}
                           </div>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
