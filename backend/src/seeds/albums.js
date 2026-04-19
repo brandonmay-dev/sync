@@ -171,7 +171,7 @@ const seedDatabase = async () => {
 
       await Song.updateMany(
         { _id: { $in: albumSongs } },
-        { albumId: album._id },
+        { album: album._id },
       );
     }
 

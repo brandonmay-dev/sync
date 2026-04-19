@@ -1,25 +1,70 @@
 import { useAuthStore } from "@/stores/useAuthStore";
+import { Button } from "@/components/ui/button";
 import Header from "./components/Header";
 import DashboardStats from "./components/DashboardStats";
-import { Album, Music } from "lucide-react";
+import { Album, Loader, Music, ShieldX } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SongsTabContent from "./components/SongsTabContent";
 import AlbumsTabContent from "./components/AlbumsTabContent";
 import { useEffect } from "react";
 import { useMusicStore } from "@/stores/useMusicStore";
+import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 
 const AdminPage = () => {
-  const { isAdmin, isLoading } = useAuthStore();
+  const { isAdmin, isLoading, error } = useAuthStore();
+  const { user } = useUser();
 
   const { fetchAlbums, fetchSongs, fetchStats } = useMusicStore();
 
   useEffect(() => {
+    if (!isAdmin) return;
+
     fetchAlbums();
     fetchSongs();
     fetchStats();
-  }, [fetchAlbums, fetchSongs, fetchStats]);
+  }, [fetchAlbums, fetchSongs, fetchStats, isAdmin]);
 
-  if (!isAdmin && !isLoading) return <div>Unauthorized</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <Loader className="size-8 animate-spin text-emerald-500" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+        <div className="max-w-md text-center space-y-6">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-500/10">
+            <ShieldX className="size-8 text-red-400" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Admin access required</h1>
+            <p className="text-zinc-400">
+              This route is working, but the current account does not have admin
+              permissions in the backend check.
+            </p>
+            {error && <p className="text-sm text-red-300">{error}</p>}
+            {user?.primaryEmailAddress?.emailAddress && (
+              <p className="text-sm text-zinc-500">
+                Signed in as {user.primaryEmailAddress.emailAddress}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            <Link to="/">
+              <Button variant="outline">Back Home</Button>
+            </Link>
+            <Link to="/auth-callback">
+              <Button>Refresh Session</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

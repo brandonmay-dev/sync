@@ -1,5 +1,5 @@
 import PlaylistSkeleton from "@/components/skeletons/PlaylistSkeleton";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/stores/useMusicStore";
@@ -14,8 +14,6 @@ const LeftSidebar = () => {
   useEffect(() => {
     fetchAlbums();
   }, [fetchAlbums]);
-
-  console.log({ albums });
 
   return (
     <div className="h-full flex flex-col gap-2">

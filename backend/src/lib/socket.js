@@ -1,10 +1,10 @@
 import { Server } from "socket.io";
 import { Message } from "../models/message.model.js";
 
-export const initializeSocket = (server) => {
+export const initializeSocket = (server, allowedOrigins) => {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: allowedOrigins,
       credentials: true,
     },
   });
@@ -15,7 +15,7 @@ export const initializeSocket = (server) => {
   io.on("connection", (socket) => {
     socket.on("user_connected", (userId) => {
       userSockets.set(userId, socket.id);
-      userActivities.set(userId, "Idle");
+      userActivities.set(userId, "Online");
 
       io.emit("user_connected", userId);
 
@@ -25,7 +25,6 @@ export const initializeSocket = (server) => {
     });
 
     socket.on("update_activity", ({ userId, activity }) => {
-      console.log("activity update", userId, activity);
       userActivities.set(userId, activity);
       io.emit("activity_updated", { userId, activity });
     });

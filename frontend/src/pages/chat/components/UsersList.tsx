@@ -4,8 +4,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatStore } from "@/stores/useChatStore";
 
 const UsersList = () => {
-  const { users, selectedUser, isLoading, setSelectedUser, onlineUsers } =
-    useChatStore();
+  const {
+    users,
+    selectedUser,
+    isLoading,
+    setSelectedUser,
+    onlineUsers,
+    error,
+  } = useChatStore();
 
   return (
     <div className="border-r border-zinc-800">
@@ -14,6 +20,14 @@ const UsersList = () => {
           <div className="space-y-2 p-4">
             {isLoading ? (
               <UsersListSkeleton />
+            ) : error ? (
+              <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center text-sm text-red-200">
+                {error}
+              </div>
+            ) : users.length === 0 ? (
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 text-center text-sm text-zinc-400">
+                No other Sync profiles are available yet.
+              </div>
             ) : (
               users.map((user) => (
                 <div

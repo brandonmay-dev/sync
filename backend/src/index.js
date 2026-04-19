@@ -19,13 +19,19 @@ dotenv.config();
 const __dirname = path.resolve();
 const app = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = (
+  process.env.CLIENT_ORIGIN?.split(",").map((origin) => origin.trim()) || [
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ]
+).filter(Boolean);
 
 const httpServer = createServer(app);
-initializeSocket(httpServer);
+initializeSocket(httpServer, allowedOrigins);
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   }),
 );

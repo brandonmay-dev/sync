@@ -1,30 +1,25 @@
-import { useSignIn } from "@clerk/clerk-react";
-import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { buttonVariants } from "./ui/button-variants";
 
-const SignInOAuthButton = () => {
-  const { signIn, isLoaded } = useSignIn();
-
-  if (!isLoaded) {
-    return null;
-  }
-
-  const signInWithGoogle = () => {
-    signIn.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/auth-callback",
-    });
-  };
-
+const SignInOAuthButtons = () => {
   return (
-    <Button
-      onClick={signInWithGoogle}
-      variant={"secondary"}
-      className="w-full text-white border-zic-200 h-11"
-    >
-      Continue with Google
-    </Button>
+    <div className="flex items-center gap-2">
+      <Link
+        to="/sign-in"
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800",
+        )}
+      >
+        Sign In
+      </Link>
+
+      <Link to="/sign-up" className={cn(buttonVariants({ variant: "default" }))}>
+        Sign Up
+      </Link>
+    </div>
   );
 };
 
-export default SignInOAuthButton;
+export default SignInOAuthButtons;

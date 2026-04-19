@@ -26,13 +26,15 @@ const HomePage = () => {
   }, [fetchFeaturedSongs, fetchMadeForYouSongs, fetchTrendingSongs]);
 
   useEffect(() => {
-    if (
-      madeForYouSongs.length > 0 &&
-      featuredSongs.length > 0 &&
-      trendingSongs.length > 0
-    ) {
-      const allSongs = [...featuredSongs, ...madeForYouSongs, ...trendingSongs];
-      initializeQueue(allSongs);
+    const allSongs = [...featuredSongs, ...madeForYouSongs, ...trendingSongs];
+
+    const uniqueSongs = allSongs.filter(
+      (song, index, self) =>
+        index === self.findIndex((s) => s._id === song._id),
+    );
+
+    if (uniqueSongs.length > 0) {
+      initializeQueue(uniqueSongs);
     }
   }, [initializeQueue, madeForYouSongs, trendingSongs, featuredSongs]);
 

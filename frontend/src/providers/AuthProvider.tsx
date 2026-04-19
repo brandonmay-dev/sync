@@ -1,44 +1,70 @@
-import { axiosInstance } from "@/lib/axios";
+import { setAuthTokenGetter } from "@/lib/axios";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useChatStore } from "@/stores/useChatStore";
 import { useAuth } from "@clerk/clerk-react";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const updateApiToken = (token: string | null) => {
-  if (token)
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  else delete axiosInstance.defaults.headers.common["Authorization"];
-};
-
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, isLoaded, isSignedIn } = useAuth();
   const [loading, setLoading] = useState(true);
-  const { checkAdminStatus } = useAuthStore();
+  const { checkAdminStatus, reset } = useAuthStore();
   const { initSocket, disconnectSocket } = useChatStore();
 
   useEffect(() => {
     const initAuth = async () => {
+      if (!isLoaded) return;
+
       try {
+        setAuthTokenGetter(async () => {
+          if (!isSignedIn) return null;
+          return getToken();
+        });
+
+        if (!isSignedIn) {
+          reset();
+          disconnectSocket();
+          return;
+        }
+
         const token = await getToken();
-        updateApiToken(token);
         if (token) {
           await checkAdminStatus();
-          // init socket
-          if (userId) initSocket(userId);
+
+          if (userId) {
+            initSocket(userId);
+          }
+        } else {
+          reset();
+          disconnectSocket();
         }
       } catch (error: any) {
-        updateApiToken(null);
+        setAuthTokenGetter(null);
+        reset();
+        disconnectSocket();
         console.log("Error in auth provider", error);
       } finally {
         setLoading(false);
       }
     };
 
+    setLoading(true);
     initAuth();
 
-    return () => disconnectSocket();
-  }, [getToken, userId, checkAdminStatus, initSocket, disconnectSocket]);
+    return () => {
+      setAuthTokenGetter(null);
+      disconnectSocket();
+    };
+  }, [
+    checkAdminStatus,
+    disconnectSocket,
+    getToken,
+    initSocket,
+    isLoaded,
+    isSignedIn,
+    reset,
+    userId,
+  ]);
 
   if (loading)
     return (

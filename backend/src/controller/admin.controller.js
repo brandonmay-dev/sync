@@ -1,7 +1,6 @@
 import { Song } from "../models/song.model.js";
 import { Album } from "../models/album.model.js";
 import cloudinary from "../lib/cloudinary.js";
-import e from "express";
 
 //helper function to upload files to Cloudinary
 const uploadToCloudinary = async (file) => {
@@ -18,14 +17,14 @@ const uploadToCloudinary = async (file) => {
 
 export const createSong = async (req, res, next) => {
   try {
-    if (!req.files || !req.files.audiofile || !req.files.imagefile) {
+    const audioFile = req.files?.audioFile || req.files?.audiofile;
+    const imageFile = req.files?.imageFile || req.files?.imagefile;
+
+    if (!audioFile || !imageFile) {
       return res.status(400).json({ message: "Missing required files" });
     }
 
     const { title, artist, albumId, duration } = req.body;
-    const audioFile = req.files.audiofile;
-    const imageFile = req.files.imagefile;
-
     const audioUrl = await uploadToCloudinary(audioFile);
     const imageUrl = await uploadToCloudinary(imageFile);
 
@@ -35,7 +34,7 @@ export const createSong = async (req, res, next) => {
       audioUrl,
       imageUrl,
       duration,
-      albumId: albumId || null,
+      album: albumId || null,
     });
 
     await song.save();
@@ -57,8 +56,12 @@ export const deleteSong = async (req, res, next) => {
     const { id } = req.params;
 
     const song = await Song.findById(id);
-    if (song.albumId) {
-      await Album.findByIdAndUpdate(song.albumId, {
+    if (!song) {
+      return res.status(404).json({ message: "Song not found" });
+    }
+
+    if (song.album) {
+      await Album.findByIdAndUpdate(song.album, {
         $pull: { songs: song._id },
       });
     }
@@ -75,7 +78,11 @@ export const deleteSong = async (req, res, next) => {
 export const createAlbum = async (req, res, next) => {
   try {
     const { title, artist, releaseYear } = req.body;
-    const { imageFile } = req.files;
+    const imageFile = req.files?.imageFile || req.files?.imagefile;
+
+    if (!imageFile) {
+      return res.status(400).json({ message: "Album artwork is required" });
+    }
 
     const imageUrl = await uploadToCloudinary(imageFile);
 
@@ -97,7 +104,7 @@ export const createAlbum = async (req, res, next) => {
 export const deleteAlbum = async (req, res, next) => {
   try {
     const { id } = req.params;
-    await Song.deleteMany({ albumId: id });
+    await Song.updateMany({ album: id }, { $set: { album: null } });
     await Album.findByIdAndDelete(id);
     res.status(200).json({ message: "Album deleted successfully" });
   } catch (error) {

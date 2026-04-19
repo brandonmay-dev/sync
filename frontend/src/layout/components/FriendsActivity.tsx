@@ -3,10 +3,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatStore } from "@/stores/useChatStore";
 import { useUser } from "@clerk/clerk-react";
 import { HeadphonesIcon, Music, Users } from "lucide-react";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 
 const FriendsActivity = () => {
-  const { users, fetchUsers, onlineUsers, userActivities } = useChatStore();
+  const { users, fetchUsers, onlineUsers, userActivities, error } =
+    useChatStore();
   const { user } = useUser();
 
   useEffect(() => {
@@ -22,62 +23,82 @@ const FriendsActivity = () => {
         </div>
       </div>
 
-      {!user && <LoginPrompt />}
+      {!user ? (
+        <LoginPrompt />
+      ) : error ? (
+        <StateMessage
+          title="Could not load profiles"
+          body={error}
+          icon={<Users className="size-7 text-zinc-300" />}
+        />
+      ) : users.length === 0 ? (
+        <NoFriendsYet />
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-4">
+            {users.map((user) => {
+              const activity = userActivities.get(user.clerkId);
+              const isOnline = onlineUsers.has(user.clerkId);
+              const isPlaying = activity?.startsWith("Playing ");
+              const [songTitle = "", artistName = ""] = activity
+                ?.replace("Playing ", "")
+                .split(" by ") ?? [];
 
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
-          {users.map((user) => {
-            const activity = userActivities.get(user.clerkId);
-            const isPlaying = activity && activity !== "Idle";
-
-            return (
-              <div
-                key={user._id}
-                className="cursor-pointer hover:bg-zinc-800/50 p-3 rounded-md transition-colors group"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <Avatar className="size-10 border border-zinc-800">
-                      <AvatarImage src={user.imageUrl} alt={user.fullName} />
-                      <AvatarFallback>{user.fullName[0]}</AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-zinc-900 
+              return (
+                <div
+                  key={user._id}
+                  className="cursor-pointer hover:bg-zinc-800/50 p-3 rounded-md transition-colors group"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="relative">
+                      <Avatar className="size-10 border border-zinc-800">
+                        <AvatarImage src={user.imageUrl} alt={user.fullName} />
+                        <AvatarFallback>{user.fullName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div
+                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-zinc-900 
 												${onlineUsers.has(user.clerkId) ? "bg-green-500" : "bg-zinc-500"}
 												`}
-                      aria-hidden="true"
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-white">
-                        {user.fullName}
-                      </span>
-                      {isPlaying && (
-                        <Music className="size-3.5 text-emerald-400 shrink-0" />
-                      )}
+                        aria-hidden="true"
+                      />
                     </div>
 
-                    {isPlaying ? (
-                      <div className="mt-1">
-                        <div className="mt-1 text-sm text-white font-medium truncate">
-                          {activity.replace("Playing ", "").split(" by ")[0]}
-                        </div>
-                        <div className="text-xs text-zinc-400 truncate">
-                          {activity.split(" by ")[1]}
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm text-white">
+                          {user.fullName}
+                        </span>
+                        {isPlaying && (
+                          <Music className="size-3.5 text-emerald-400 shrink-0" />
+                        )}
                       </div>
-                    ) : (
-                      <div className="mt-1 text-xs text-zinc-400">Idle</div>
-                    )}
+
+                      {isPlaying ? (
+                        <div className="mt-1">
+                          <div className="mt-1 text-sm text-white font-medium truncate">
+                            {songTitle}
+                          </div>
+                          <div className="text-xs text-zinc-400 truncate">
+                            {artistName}
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className={`mt-1 text-xs ${
+                            isOnline ? "text-emerald-400" : "text-zinc-400"
+                          }`}
+                        >
+                          {isOnline ? "Online" : "Offline"}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      )}
     </div>
   );
 };
@@ -103,6 +124,33 @@ const LoginPrompt = () => (
       <p className="text-sm text-zinc-400">
         Login to discover what music your friends are enjoying right now
       </p>
+    </div>
+  </div>
+);
+
+const NoFriendsYet = () => (
+  <StateMessage
+    title="No other profiles yet"
+    body="Sign into Sync with another account and keep both windows open to see them here."
+    icon={<Users className="size-7 text-zinc-300" />}
+  />
+);
+
+const StateMessage = ({
+  title,
+  body,
+  icon,
+}: {
+  title: string;
+  body: string;
+  icon: ReactNode;
+}) => (
+  <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3">
+    <div className="rounded-full bg-zinc-800 p-4">{icon}</div>
+
+    <div className="space-y-1 max-w-64">
+      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <p className="text-sm text-zinc-400">{body}</p>
     </div>
   </div>
 );

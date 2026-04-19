@@ -7,6 +7,7 @@ import ChatHeader from "./components/ChatHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import MessageInput from "./components/MessageInput";
+import { Music2 } from "lucide-react";
 
 const formatTime = (date: string) => {
   return new Date(date).toLocaleTimeString("en-US", {
@@ -27,8 +28,6 @@ const ChatPage = () => {
   useEffect(() => {
     if (selectedUser) fetchMessages(selectedUser.clerkId);
   }, [selectedUser, fetchMessages]);
-
-  console.log({ messages });
 
   return (
     <main className="h-full rounded-lg bg-linear-to-b from-zinc-800 to-zinc-900 overflow-hidden">
@@ -92,7 +91,9 @@ export default ChatPage;
 
 const NoConversationPlaceholder = () => (
   <div className="flex flex-col items-center justify-center h-full space-y-6">
-    <img src="/spotify.png" alt="Spotify" className="size-16 animate-bounce" />
+    <div className="flex size-16 items-center justify-center rounded-full bg-emerald-500/10 animate-bounce">
+      <Music2 className="size-8 text-emerald-400" />
+    </div>
     <div className="text-center">
       <h3 className="text-zinc-300 text-lg font-medium mb-1">
         No conversation selected

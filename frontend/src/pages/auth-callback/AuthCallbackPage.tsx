@@ -16,7 +16,8 @@ const AuthCallbackPage = () => {
         syncAttempted.current = true;
         await axiosInstance.post("/auth/callback", {
           id: user.id,
-          firstName: user.lastName,
+          firstName: user.firstName,
+          lastName: user.lastName,
           imageUrl: user.imageUrl,
         });
       } catch {

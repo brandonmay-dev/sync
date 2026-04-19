@@ -10,6 +10,9 @@ interface AuthStore {
   reset: () => void;
 }
 
+const getErrorMessage = (error: any, fallback: string) =>
+  error.response?.data?.message || error.message || fallback;
+
 export const useAuthStore = create<AuthStore>((set) => ({
   isAdmin: false,
   isLoading: false,
@@ -21,7 +24,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const response = await axiosInstance.get("/admin/check");
       set({ isAdmin: response.data.admin });
     } catch (error: any) {
-      set({ isAdmin: false, error: error.response.data.message });
+      set({
+        isAdmin: false,
+        error: getErrorMessage(error, "Failed to check admin status"),
+      });
     } finally {
       set({ isLoading: false });
     }

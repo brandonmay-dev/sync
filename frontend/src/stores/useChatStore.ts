@@ -22,10 +22,14 @@ interface ChatStore {
   setSelectedUser: (user: User | null) => void;
 }
 
-const baseURL =
-  import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
+const SOCKET_BASE_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  (import.meta.env.DEV ? "http://localhost:3000" : window.location.origin);
 
-const socket = io(baseURL, {
+const getErrorMessage = (error: any, fallback: string) =>
+  error.response?.data?.message || error.message || fallback;
+
+const socket = io(SOCKET_BASE_URL, {
   autoConnect: false, // only connect if user is authenticated
   withCredentials: true,
 });
@@ -49,70 +53,129 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const response = await axiosInstance.get("/users");
       set({ users: response.data });
     } catch (error: any) {
-      set({ error: error.response.data.message });
+      set({ error: getErrorMessage(error, "Failed to load users") });
     } finally {
       set({ isLoading: false });
     }
   },
 
   initSocket: (userId) => {
-    if (!get().isConnected) {
-      socket.auth = { userId };
-      socket.connect();
+    const currentSocketUserId = (socket.auth as { userId?: string } | undefined)
+      ?.userId;
+    if (get().isConnected && currentSocketUserId === userId) return;
 
-      socket.emit("user_connected", userId);
+    socket.off("connect");
+    socket.off("disconnect");
+    socket.off("connect_error");
+    socket.off("users_online");
+    socket.off("activities");
+    socket.off("user_connected");
+    socket.off("user_disconnected");
+    socket.off("new_message");
+    socket.off("message_sent");
+    socket.off("activity_updated");
 
-      socket.on("users_online", (users: string[]) => {
-        set({ onlineUsers: new Set(users) });
-      });
-
-      socket.on("activities", (activities: [string, string][]) => {
-        set({ userActivities: new Map(activities) });
-      });
-
-      socket.on("user_connected", (userId: string) => {
-        set((state) => ({
-          onlineUsers: new Set([...state.onlineUsers, userId]),
-        }));
-      });
-
-      socket.on("user_disconnected", (userId: string) => {
-        set((state) => {
-          const newOnlineUsers = new Set(state.onlineUsers);
-          newOnlineUsers.delete(userId);
-          return { onlineUsers: newOnlineUsers };
-        });
-      });
-
-      socket.on("receive_message", (message: Message) => {
-        set((state) => ({
-          messages: [...state.messages, message],
-        }));
-      });
-
-      socket.on("message_sent", (message: Message) => {
-        set((state) => ({
-          messages: [...state.messages, message],
-        }));
-      });
-
-      socket.on("activity_updated", ({ userId, activity }) => {
-        set((state) => {
-          const newActivities = new Map(state.userActivities);
-          newActivities.set(userId, activity);
-          return { userActivities: newActivities };
-        });
-      });
-
-      set({ isConnected: true });
+    if (socket.connected) {
+      socket.disconnect();
     }
+
+    socket.auth = { userId };
+
+    socket.on("connect", () => {
+      socket.emit("user_connected", userId);
+      set({ isConnected: true, error: null });
+    });
+
+    socket.on("disconnect", () => {
+      set({
+        isConnected: false,
+        onlineUsers: new Set(),
+        userActivities: new Map(),
+      });
+    });
+
+    socket.on("connect_error", (error: Error) => {
+      set({ error: error.message || "Failed to connect to live updates" });
+    });
+
+    socket.on("users_online", (users: string[]) => {
+      set({ onlineUsers: new Set(users) });
+      void get().fetchUsers();
+    });
+
+    socket.on("activities", (activities: [string, string][]) => {
+      set({ userActivities: new Map(activities) });
+    });
+
+    socket.on("user_connected", (connectedUserId: string) => {
+      set((state) => ({
+        onlineUsers: new Set([...state.onlineUsers, connectedUserId]),
+      }));
+      void get().fetchUsers();
+    });
+
+    socket.on("user_disconnected", (disconnectedUserId: string) => {
+      set((state) => {
+        const newOnlineUsers = new Set(state.onlineUsers);
+        newOnlineUsers.delete(disconnectedUserId);
+        return { onlineUsers: newOnlineUsers };
+      });
+    });
+
+    socket.on("new_message", (message: Message) => {
+      set((state) =>
+        state.messages.some((existingMessage) => existingMessage._id === message._id)
+          ? state
+          : {
+              messages: [...state.messages, message],
+            },
+      );
+    });
+
+    socket.on("message_sent", (message: Message) => {
+      set((state) =>
+        state.messages.some((existingMessage) => existingMessage._id === message._id)
+          ? state
+          : {
+              messages: [...state.messages, message],
+            },
+      );
+    });
+
+    socket.on("activity_updated", ({ userId, activity }) => {
+      set((state) => {
+        const newActivities = new Map(state.userActivities);
+        newActivities.set(userId, activity);
+        return { userActivities: newActivities };
+      });
+    });
+
+    socket.connect();
   },
 
   disconnectSocket: () => {
-    if (get().isConnected) {
+    socket.off("connect");
+    socket.off("disconnect");
+    socket.off("connect_error");
+    socket.off("users_online");
+    socket.off("activities");
+    socket.off("user_connected");
+    socket.off("user_disconnected");
+    socket.off("new_message");
+    socket.off("message_sent");
+    socket.off("activity_updated");
+
+    if (socket.connected) {
       socket.disconnect();
-      set({ isConnected: false });
     }
+
+    set({
+      isConnected: false,
+      onlineUsers: new Set(),
+      userActivities: new Map(),
+      messages: [],
+      selectedUser: null,
+    });
   },
 
   sendMessage: async (receiverId, senderId, content) => {
@@ -128,7 +191,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const response = await axiosInstance.get(`/users/messages/${userId}`);
       set({ messages: response.data });
     } catch (error: any) {
-      set({ error: error.response.data.message });
+      set({ error: getErrorMessage(error, "Failed to load messages") });
     } finally {
       set({ isLoading: false });
     }

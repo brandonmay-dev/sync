@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import type { Song } from "@/types";
 import { Pause, Play } from "lucide-react";
 
-const PlayButton = ({ song }: { song: Song }) => {
+const PlayButton = ({
+  song,
+  className,
+}: {
+  song: Song;
+  className?: string;
+}) => {
   const { currentSong, isPlaying, setCurrentSong, togglePlay } =
     usePlayerStore();
   const isCurrentSong = currentSong?._id === song._id;
@@ -17,10 +24,13 @@ const PlayButton = ({ song }: { song: Song }) => {
     <Button
       size={"icon"}
       onClick={handlePlay}
-      className={`absolute bottom-3 right-2 bg-green-500 hover:bg-green-400 hover:scale-105 transition-all 
+      className={cn(
+        `absolute bottom-3 right-2 bg-green-500 hover:bg-green-400 hover:scale-105 transition-all 
 				opacity-0 translate-y-2 group-hover:translate-y-0 ${
           isCurrentSong ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-        }`}
+        }`,
+        className,
+      )}
     >
       {isCurrentSong && isPlaying ? (
         <Pause className="size-5 text-black" />
