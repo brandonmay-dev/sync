@@ -4,11 +4,19 @@ import { useChatStore } from "@/stores/useChatStore";
 import { useUser } from "@clerk/clerk-react";
 import { HeadphonesIcon, Music, Users } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const FriendsActivity = () => {
-  const { users, fetchUsers, onlineUsers, userActivities, error } =
-    useChatStore();
+  const {
+    users,
+    fetchUsers,
+    onlineUsers,
+    userActivities,
+    error,
+    setSelectedUser,
+  } = useChatStore();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) fetchUsers();
@@ -44,10 +52,18 @@ const FriendsActivity = () => {
                 ?.replace("Playing ", "")
                 .split(" by ") ?? [];
 
+              const handleProfileClick = () => {
+                setSelectedUser(user);
+                navigate("/chat");
+              };
+
               return (
-                <div
+                <button
+                  type="button"
                   key={user._id}
-                  className="cursor-pointer hover:bg-zinc-800/50 p-3 rounded-md transition-colors group"
+                  onClick={handleProfileClick}
+                  className="w-full cursor-pointer rounded-md p-3 text-left transition-colors hover:bg-zinc-800/50 group"
+                  aria-label={`Open chat with ${user.fullName}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="relative">
@@ -93,7 +109,7 @@ const FriendsActivity = () => {
                       )}
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
