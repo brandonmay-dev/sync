@@ -91,6 +91,9 @@ const FriendsActivity = () => {
 
                       {isPlaying ? (
                         <div className="mt-1">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-emerald-400/90">
+                            Listening now
+                          </div>
                           <div className="mt-1 text-sm text-white font-medium truncate">
                             {songTitle}
                           </div>

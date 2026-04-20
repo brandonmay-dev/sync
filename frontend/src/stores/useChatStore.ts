@@ -20,6 +20,7 @@ interface ChatStore {
   sendMessage: (receiverId: string, senderId: string, content: string) => void;
   fetchMessages: (userId: string) => Promise<void>;
   setSelectedUser: (user: User | null) => void;
+  updateActivity: (activity: string) => void;
 }
 
 const SOCKET_BASE_URL =
@@ -46,6 +47,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   selectedUser: null,
 
   setSelectedUser: (user) => set({ selectedUser: user }),
+
+  updateActivity: (activity) => {
+    const currentUserId = (socket.auth as { userId?: string } | undefined)?.userId;
+
+    if (!socket.connected || !currentUserId) return;
+
+    socket.emit("update_activity", { userId: currentUserId, activity });
+  },
 
   fetchUsers: async () => {
     set({ isLoading: true, error: null });
