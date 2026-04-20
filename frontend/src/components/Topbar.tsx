@@ -18,7 +18,7 @@ const Topbar = () => {
         <img
           src={syncTopbarLogo}
           alt="Sync"
-          className="h-11 w-11 object-contain brightness-0 invert"
+          className="h-12 w-auto max-w-[320px] object-contain md:h-14"
         />
         <span className="sr-only">Sync</span>
       </Link>
