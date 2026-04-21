@@ -22,6 +22,17 @@ const FriendsActivity = () => {
     if (user) fetchUsers();
   }, [fetchUsers, user]);
 
+  const sortedUsers = [...users].sort((leftUser, rightUser) => {
+    const leftIsOnline = onlineUsers.has(leftUser.clerkId);
+    const rightIsOnline = onlineUsers.has(rightUser.clerkId);
+
+    if (leftIsOnline !== rightIsOnline) {
+      return leftIsOnline ? -1 : 1;
+    }
+
+    return leftUser.fullName.localeCompare(rightUser.fullName);
+  });
+
   return (
     <div className="h-full bg-zinc-900 rounded-lg flex flex-col">
       <div className="p-4 flex justify-between items-center border-b border-zinc-800">
@@ -44,7 +55,7 @@ const FriendsActivity = () => {
       ) : (
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-4">
-            {users.map((user) => {
+            {sortedUsers.map((user) => {
               const activity = userActivities.get(user.clerkId);
               const isOnline = onlineUsers.has(user.clerkId);
               const isPlaying = activity?.startsWith("Playing ");
