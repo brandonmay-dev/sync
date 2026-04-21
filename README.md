@@ -1,15 +1,11 @@
-<h1 align="center">Sync</h1>
+# Sync
 
-<p align="center">
-  Full-stack music streaming & social listening app
-</p>
+Full-stack music streaming & social listening app.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-Frontend-blue" />
-  <img src="https://img.shields.io/badge/Node.js-Backend-green" />
-  <img src="https://img.shields.io/badge/MongoDB-Database-brightgreen" />
-  <img src="https://img.shields.io/badge/Socket.IO-Realtime-black" />
-</p>
+![React Frontend badge](https://img.shields.io/badge/React-Frontend-blue)
+![Node.js Backend badge](https://img.shields.io/badge/Node.js-Backend-green)
+![MongoDB Database badge](https://img.shields.io/badge/MongoDB-Database-brightgreen)
+![Socket.IO Realtime badge](https://img.shields.io/badge/Socket.IO-Realtime-black)
 
 ---
 
