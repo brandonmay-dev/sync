@@ -1,51 +1,79 @@
-# Sync
+<h1 align="center">Sync</h1>
 
-Sync is a full-stack music streaming and social listening app built with React, TypeScript, Express, MongoDB, Clerk, Cloudinary, and Socket.IO. Users can browse music, play songs across multiple views, chat in real time, and see when other listeners are online or actively playing a track.
+<p align="center">
+  Full-stack music streaming & social listening app
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-Frontend-blue" />
+  <img src="https://img.shields.io/badge/Node.js-Backend-green" />
+  <img src="https://img.shields.io/badge/MongoDB-Database-brightgreen" />
+  <img src="https://img.shields.io/badge/Socket.IO-Realtime-black" />
+</p>
+
+---
+
+## Demo
+
+Watch a quick walkthrough of the app:  
+[Add your video link here]
+
+---
+
+## Overview
+
+Sync is a full-stack music streaming and social listening app built with React, TypeScript, Express, MongoDB, Clerk, Cloudinary, and Socket.IO.
+
+Users can browse music, play songs across multiple views, chat in real time, and see who’s online or actively listening.
+
+---
 
 ## Highlights
 
-- React and TypeScript frontend powered by Vite
-- Express and MongoDB backend with Mongoose models
-- Clerk-hosted sign-in and sign-up flows
-- Protected admin dashboard for song and album management
-- Cloudinary-backed audio and artwork uploads
-- Real-time chat and presence with Socket.IO
-- Shared playback state across homepage, album, and collection views
+- Full-stack architecture with React (Vite) frontend and Express + MongoDB backend
+- Authentication with Clerk (Google OAuth + email/password)
+- Protected admin dashboard for managing songs and albums
+- Cloudinary integration for audio and artwork uploads
+- Real-time chat and live presence powered by Socket.IO
+- Shared playback state across homepage, albums, and collections using Zustand
+
+---
 
 ## Tech Stack
 
-| Layer | Tools |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, Zustand, React Router |
-| Backend | Node.js, Express 5, Mongoose, Socket.IO |
-| Auth and Media | Clerk, Cloudinary |
-| Data | MongoDB |
+| Layer        | Tools                                                        |
+| ------------ | ------------------------------------------------------------ |
+| Frontend     | React, TypeScript, Vite, Tailwind CSS, Zustand, React Router |
+| Backend      | Node.js, Express, Mongoose, Socket.IO                        |
+| Auth & Media | Clerk, Cloudinary                                            |
+| Database     | MongoDB                                                      |
 
-## Main Features
+---
+
+## Core Features
 
 - Browse featured, made-for-you, trending, and album-based music collections
-- Click song cards and list rows directly to play or pause tracks
-- Sign in or sign up through Clerk
-- See friend presence with online, offline, and listening-now status
-- Open a chat directly from the right-side profile rail
-- Send and receive live messages
-- Manage songs and albums from an admin dashboard
-- View admin stats for songs, albums, users, and artists
+- Play songs directly from cards or list views
+- Real-time chat between users
+- Live presence (online, offline, listening status)
+- Admin dashboard for uploading and managing songs and albums
+- Cloud-based media storage with Cloudinary
+- Application stats for admin insights
+
+---
 
 ## Routes
 
-Frontend:
+### Frontend
 
 - `/`
 - `/sign-in`
 - `/sign-up`
 - `/chat`
-- `/made-for-you`
-- `/trending`
 - `/albums/:albumId`
 - `/admin`
 
-Backend:
+### Backend
 
 - `/api/auth`
 - `/api/users`
@@ -54,19 +82,20 @@ Backend:
 - `/api/stats`
 - `/api/admin`
 
+---
+
 ## Local Setup
 
-### Install dependencies
+### 1. Install dependencies
 
 ```bash
-cd backend
-npm install
-
-cd ../frontend
-npm install
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-### Create environment files
+---
+
+### 2. Environment variables
 
 Create `backend/.env` with:
 
@@ -89,43 +118,50 @@ VITE_API_URL=http://localhost:3000/api
 VITE_SOCKET_URL=http://localhost:3000
 ```
 
-### Run the app
+---
 
-Start the backend:
-
-```bash
-cd backend
-npm run dev
-```
-
-Start the frontend:
+### 3. Run the app
 
 ```bash
-cd frontend
-npm run dev
+# backend
+cd backend && npm run dev
+
+# frontend
+cd frontend && npm run dev
 ```
 
-Local URLs:
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:3000`
 
-- frontend: `http://localhost:5173`
-- backend: `http://localhost:3000`
+---
 
 ## Seed Data
 
-Seed songs only:
-
 ```bash
+# songs only
 cd backend
 npm run seed:songs
 ```
 
-Seed albums and songs:
-
 ```bash
+# albums + songs
 cd backend
 npm run seed:albums
 ```
 
-## Why This Project Is Strong
+---
 
-This project demonstrates end-to-end full-stack work across frontend UI, API design, auth, admin tooling, file uploads, real-time systems, and state management. It is especially useful as a portfolio project because it shows product thinking and cross-layer debugging, not just isolated components.
+## What This Project Demonstrates
+
+- Full-stack architecture and API design
+- Authentication and protected routes using Clerk
+- Real-time systems with Socket.IO
+- File uploads and media handling with Cloudinary
+- Global state management with Zustand
+- Debugging across frontend, backend, and integration layers
+
+---
+
+## Notes
+
+This is a demo environment. Data may be reset periodically.
