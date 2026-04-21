@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:3000/api" : "/api");
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.MODE === "development" ? "http://localhost:3000/api" : "/api");
 
 let authTokenGetter: (() => Promise<string | null>) | null = null;
 

@@ -1,17 +1,34 @@
 import { Song } from "../models/song.model.js";
 import { Album } from "../models/album.model.js";
 import cloudinary from "../lib/cloudinary.js";
+import { unlink } from "node:fs/promises";
+
+const cleanupTempFile = async (tempFilePath) => {
+  if (!tempFilePath) return;
+
+  try {
+    await unlink(tempFilePath);
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      console.error("Error deleting temp upload file:", error);
+    }
+  }
+};
 
 //helper function to upload files to Cloudinary
 const uploadToCloudinary = async (file) => {
+  const tempFilePath = file?.tempFilePath;
+
   try {
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+    const result = await cloudinary.uploader.upload(tempFilePath, {
       resource_type: "auto",
     });
     return result.secure_url;
   } catch (error) {
     console.error("Error uploading to Cloudinary:", error);
     throw new Error("Failed to upload file");
+  } finally {
+    await cleanupTempFile(tempFilePath);
   }
 };
 
