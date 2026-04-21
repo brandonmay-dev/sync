@@ -8,6 +8,7 @@ import {
   Pause,
   Play,
   Repeat,
+  Repeat1,
   Shuffle,
   SkipBack,
   SkipForward,
@@ -22,8 +23,17 @@ const formatTime = (seconds: number) => {
 };
 
 export const PlaybackControls = () => {
-  const { currentSong, isPlaying, togglePlay, playNext, playPrevious } =
-    usePlayerStore();
+  const {
+    currentSong,
+    isPlaying,
+    isShuffled,
+    repeatMode,
+    togglePlay,
+    toggleShuffle,
+    cycleRepeatMode,
+    playNext,
+    playPrevious,
+  } = usePlayerStore();
 
   const [volume, setVolume] = useState(75);
   const [currentTime, setCurrentTime] = useState(0);
@@ -84,7 +94,13 @@ export const PlaybackControls = () => {
             <Button
               size="icon"
               variant="ghost"
-              className="hidden sm:inline-flex hover:text-white text-zinc-400"
+              className={`inline-flex ${
+                isShuffled
+                  ? "text-emerald-400 bg-emerald-500/10 hover:text-emerald-300 hover:bg-emerald-500/20"
+                  : "hover:text-white text-zinc-400"
+              }`}
+              onClick={toggleShuffle}
+              aria-label={isShuffled ? "Disable shuffle" : "Enable shuffle"}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -123,9 +139,19 @@ export const PlaybackControls = () => {
             <Button
               size="icon"
               variant="ghost"
-              className="hidden sm:inline-flex hover:text-white text-zinc-400"
+              className={`inline-flex ${
+                repeatMode !== "off"
+                  ? "text-emerald-400 bg-emerald-500/10 hover:text-emerald-300 hover:bg-emerald-500/20"
+                  : "hover:text-white text-zinc-400"
+              }`}
+              onClick={cycleRepeatMode}
+              aria-label={`Repeat mode: ${repeatMode}`}
             >
-              <Repeat className="h-4 w-4" />
+              {repeatMode === "one" ? (
+                <Repeat1 className="h-4 w-4" />
+              ) : (
+                <Repeat className="h-4 w-4" />
+              )}
             </Button>
           </div>
 

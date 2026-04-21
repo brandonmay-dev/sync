@@ -8,7 +8,8 @@ const AudioPlayer = () => {
   const prevSongRef = useRef<string | null>(null);
   const lastActivityRef = useRef<string | null>(null);
 
-  const { currentSong, isPlaying, playNext } = usePlayerStore();
+  const { currentSong, isPlaying, playNext, repeatMode, restartCurrentSong, restartCounter } =
+    usePlayerStore();
   const { updateActivity, isConnected } = useChatStore();
   const { userId } = useAuth();
 
@@ -21,6 +22,11 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
 
     const handleEnded = () => {
+      if (repeatMode === "one") {
+        restartCurrentSong();
+        return;
+      }
+
       playNext();
     };
 
@@ -29,7 +35,7 @@ const AudioPlayer = () => {
     return () => {
       audio?.removeEventListener("ended", handleEnded);
     };
-  }, [playNext]);
+  }, [playNext, repeatMode, restartCurrentSong]);
 
   useEffect(() => {
     if (!audioRef.current || !currentSong) return;
@@ -43,6 +49,16 @@ const AudioPlayer = () => {
       if (isPlaying) audio.play();
     }
   }, [currentSong, isPlaying]);
+
+  useEffect(() => {
+    if (!audioRef.current || !currentSong) return;
+
+    const audio = audioRef.current;
+    audio.currentTime = 0;
+    if (isPlaying) {
+      void audio.play();
+    }
+  }, [currentSong, isPlaying, restartCounter]);
 
   useEffect(() => {
     if (!userId || !isConnected) {
