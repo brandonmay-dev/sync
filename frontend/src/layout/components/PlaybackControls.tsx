@@ -2,9 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import {
-  Laptop2,
-  ListMusic,
-  Mic2,
   Pause,
   Play,
   Repeat,
@@ -12,6 +9,8 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  Volume2,
+  VolumeX,
   Volume1,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -36,8 +35,10 @@ export const PlaybackControls = () => {
   } = usePlayerStore();
 
   const [volume, setVolume] = useState(75);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const previousVolumeRef = useRef(75);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -62,6 +63,24 @@ export const PlaybackControls = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = value[0];
     }
+  };
+
+  const handleToggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isMuted || volume === 0) {
+      const restoredVolume = previousVolumeRef.current > 0 ? previousVolumeRef.current : 75;
+      setVolume(restoredVolume);
+      audio.volume = restoredVolume / 100;
+      setIsMuted(false);
+      return;
+    }
+
+    previousVolumeRef.current = volume;
+    setVolume(0);
+    audio.volume = 0;
+    setIsMuted(true);
   };
 
   return (
@@ -171,35 +190,21 @@ export const PlaybackControls = () => {
         </div>
         {/* volume controls */}
         <div className="hidden sm:flex items-center gap-4 min-w-45 w-[30%] justify-end">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="hover:text-white text-zinc-400"
-          >
-            <Mic2 className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="hover:text-white text-zinc-400"
-          >
-            <ListMusic className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="hover:text-white text-zinc-400"
-          >
-            <Laptop2 className="h-4 w-4" />
-          </Button>
-
           <div className="flex items-center gap-2">
             <Button
               size="icon"
               variant="ghost"
               className="hover:text-white text-zinc-400"
+              onClick={handleToggleMute}
+              aria-label={isMuted || volume === 0 ? "Unmute" : "Mute"}
             >
-              <Volume1 className="h-4 w-4" />
+              {isMuted || volume === 0 ? (
+                <VolumeX className="h-4 w-4" />
+              ) : volume <= 40 ? (
+                <Volume1 className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
             </Button>
 
             <Slider
@@ -209,6 +214,10 @@ export const PlaybackControls = () => {
               className="w-24 hover:cursor-grab active:cursor-grabbing"
               onValueChange={(value) => {
                 setVolume(value[0]);
+                if (value[0] > 0) {
+                  previousVolumeRef.current = value[0];
+                }
+                setIsMuted(value[0] === 0);
                 if (audioRef.current) {
                   audioRef.current.volume = value[0] / 100;
                 }
