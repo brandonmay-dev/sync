@@ -12,7 +12,7 @@ Full-stack music streaming & social listening app.
 ## Demo
 
 Watch a quick walkthrough of the app:  
-[Add your video link here]
+[Walkthrough Video](https://vimeo.com/manage/videos/1191383615)
 
 ---
 
